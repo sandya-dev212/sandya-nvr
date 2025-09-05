@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <title>Sandya NVR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="/favicon.ico">
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;margin:0}
     header,footer{background:#0f172a;color:#fff;padding:10px 16px}

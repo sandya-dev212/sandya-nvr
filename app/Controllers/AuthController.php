@@ -1,25 +1,45 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Models\UsersModel;
 
 class AuthController extends BaseController
 {
     public function login()
     {
-        if ($this->request->getMethod()==='post') {
-            $username = trim($this->request->getPost('username'));
-            $password = (string)$this->request->getPost('password');
-            $m = new UsersModel();
-            $user = $m->where('username',$username)->first();
+        // kalau sudah login, langsung lempar ke dashboard
+        if (session()->get('uid')) {
+            return redirect()->to('/dashboard');
+        }
 
-            if ($user && $user['type']==='local' && password_verify($password, $user['password_hash'])) {
-                session()->set(['uid'=>$user['id'],'uname'=>$user['username'],'is_admin'=>(int)$user['is_admin']]);
+        if ($this->request->getMethod() === 'post') {
+            $username = trim((string)$this->request->getPost('username'));
+            $password = (string)$this->request->getPost('password');
+
+            $m = new UsersModel();
+            $user = $m->where('username', $username)
+                      ->where('status', 'active')
+                      ->first();
+
+            // LOCAL auth (LDAP nanti)
+            if ($user && $user['type'] === 'local' && password_verify($password, $user['password_hash'])) {
+                // set session
+                session()->set([
+                    'uid'      => (int)$user['id'],
+                    'uname'    => $user['username'],
+                    'is_admin' => (int)$user['is_admin'],
+                ]);
+                session()->regenerate(true);
+
                 return redirect()->to('/dashboard');
             }
-            // TODO: LDAP branch nanti
-            return redirect()->back()->with('error','Login gagal');
+
+            // TODO: LDAP branch di sini (nanti)
+            return redirect()->back()->with('error', 'Login gagal');
         }
-        return view('auth/login');
+
+        return view('auth/login', ['stats' => sys_stats()]);
     }
 
     public function logout()
@@ -28,9 +48,14 @@ class AuthController extends BaseController
         return redirect()->to('/login');
     }
 
-    public function profile()
+    // debug helper
+    public function whoami()
     {
-        // placeholder
-        return view('profile/index');
+        $s = session();
+        return $this->response->setJSON([
+            'uid'   => $s->get('uid'),
+            'uname' => $s->get('uname'),
+            'is_admin' => $s->get('is_admin'),
+        ]);
     }
 }

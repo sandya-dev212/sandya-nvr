@@ -1,6 +1,8 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
+
 <h2>Dashboard</h2>
+
 <?php if (empty($cameras)): ?>
   <div class="card muted">Belum ada kamera (atau belum di-assign).</div>
 <?php else: ?>
@@ -13,4 +15,5 @@
     <?php endforeach; ?>
   </div>
 <?php endif; ?>
+
 <?= $this->endSection() ?>
