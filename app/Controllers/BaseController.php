@@ -7,15 +7,17 @@ use Psr\Log\LoggerInterface;
 
 class BaseController extends Controller
 {
-    protected $helpers = ['nvr']; // biar helper ke-load tanpa oprek Autoload.php
+    // auto-load helper
+    protected $helpers = ['nvr'];
 
-    public function initController(\CodeIgniter\HTTP\RequestInterface $request, \CodeIgniter\HTTP\ResponseInterface $response, LoggerInterface $logger)
-    {
+    public function initController(
+        \CodeIgniter\HTTP\RequestInterface $request,
+        \CodeIgniter\HTTP\ResponseInterface $response,
+        LoggerInterface $logger
+    ) {
         parent::initController($request, $response, $logger);
 
-        // pastiin session ready
-        if (! session()->isValid()) {
-            session();
-        }
+        // start session (CI4 auto-handle)
+        session();
     }
 }
