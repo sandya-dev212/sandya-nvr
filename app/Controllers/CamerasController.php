@@ -44,36 +44,29 @@ class CamerasController extends BaseController
             $data = $this->validateAndCollect();
             if ($data['__ok']) {
                 unset($data['__ok']);
-
-                $db = Database::connect();
-                $m  = new CamerasModel();
-
+                $m  = new \App\Models\CamerasModel();
                 try {
-                    $ok = $m->insert($data);
-                    if ($ok === false) {
-                        // error dari Model/validation
-                        $errors = $m->errors();
-                        session()->setFlashdata('err', 'Save failed: '.json_encode($errors));
+                    if ($m->insert($data) === false) {
+                        session()->setFlashdata('err', 'Save failed: '.json_encode($m->errors()));
                         return redirect()->back()->withInput();
                     }
                     session()->setFlashdata('msg', 'New camera <b>'.esc($data['name']).'</b> added.');
                     return redirect()->to('/cameras');
                 } catch (\Throwable $e) {
-                    $dberr = $db->error();
-                    $msg = $dberr['message'] ?? $e->getMessage();
-                    session()->setFlashdata('err', 'DB error: '.$msg);
+                    $dbErr = \Config\Database::connect()->error();
+                    session()->setFlashdata('err', 'DB error: '.($dbErr['message'] ?? $e->getMessage()));
                     return redirect()->back()->withInput();
                 }
-            } else {
-                session()->setFlashdata('err', 'Validation failed: '.json_encode($data['__errors']));
-                return redirect()->back()->withInput();
             }
+            session()->setFlashdata('err', 'Validation failed: '.json_encode($data['__errors']));
+            return redirect()->back()->withInput();
         }
 
+        // <<< HANYA INI YANG PENTING: JANGAN old() >>>
         return view('cameras/form', [
             'mode'  => 'create',
             'errors'=> [],
-            'data'  => old() ?: [],
+            'data'  => [],                 // biarin kosong, field di view pakai old('field', ...)
             'stats' => sys_stats(),
             'msg'   => session()->getFlashdata('msg'),
             'err'   => session()->getFlashdata('err'),
@@ -84,7 +77,7 @@ class CamerasController extends BaseController
     {
         if ($r = $this->guardAdmin()) return $r;
 
-        $m   = new CamerasModel();
+        $m   = new \App\Models\CamerasModel();
         $cam = $m->find((int)$id);
         if (!$cam) {
             session()->setFlashdata('err', 'Camera not found.');
@@ -103,26 +96,25 @@ class CamerasController extends BaseController
                     session()->setFlashdata('msg', 'Camera <b>'.esc($data['name']).'</b> updated.');
                     return redirect()->to('/cameras');
                 } catch (\Throwable $e) {
-                    $dberr = Database::connect()->error();
-                    $msg   = $dberr['message'] ?? $e->getMessage();
-                    session()->setFlashdata('err', 'DB error: '.$msg);
+                    $dbErr = \Config\Database::connect()->error();
+                    session()->setFlashdata('err', 'DB error: '.($dbErr['message'] ?? $e->getMessage()));
                     return redirect()->back()->withInput();
                 }
-            } else {
-                session()->setFlashdata('err', 'Validation failed: '.json_encode($data['__errors']));
-                return redirect()->back()->withInput();
             }
+            session()->setFlashdata('err', 'Validation failed: '.json_encode($data['__errors']));
+            return redirect()->back()->withInput();
         }
 
         return view('cameras/form', [
             'mode'  => 'edit',
             'errors'=> [],
-            'data'  => array_merge($cam, old()?:[]),
+            'data'  => $cam,              // data asal; nilai input terbaru diambil pakai old()
             'stats' => sys_stats(),
             'msg'   => session()->getFlashdata('msg'),
             'err'   => session()->getFlashdata('err'),
         ]);
     }
+
 
     public function delete($id)
     {

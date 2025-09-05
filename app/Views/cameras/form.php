@@ -14,31 +14,37 @@
   <?= csrf_field() ?>
   <div class="card">
     <label>Nama Kamera<br>
-      <input name="name" required value="<?= esc($data['name'] ?? '') ?>" style="width:360px">
+      <input name="name" required
+             value="<?= old('name', $data['name'] ?? '') ?>" style="width:360px">
     </label><br><br>
 
     <label>Camera IP<br>
-      <input name="ip" required placeholder="xx.xx.xx.xx" value="<?= esc($data['ip'] ?? '') ?>" style="width:220px">
+      <input name="ip" required placeholder="10.11.212.11"
+             value="<?= old('ip', $data['ip'] ?? '') ?>" style="width:220px">
     </label><br><br>
 
     <label>Username (opsional)<br>
-      <input name="username" value="<?= esc($data['username'] ?? '') ?>" style="width:220px">
+      <input name="username"
+             value="<?= old('username', $data['username'] ?? '') ?>" style="width:220px">
     </label><br><br>
 
     <label>Password (opsional)<br>
-      <input name="password" value="<?= esc($data['password'] ?? '') ?>" style="width:220px">
+      <input name="password"
+             value="<?= old('password', $data['password'] ?? '') ?>" style="width:220px">
     </label><br><br>
 
     <label>Path (/, /index, /cam/realmonitor?channel=1&subtype=0)<br>
-      <input name="path" placeholder="/" value="<?= esc($data['path'] ?? '/') ?>" style="width:600px">
+      <input name="path" placeholder="/"
+             value="<?= old('path', $data['path'] ?? '/') ?>" style="width:600px">
     </label><br><br>
 
     <label>Port (opsional, default 554)<br>
-      <input name="port" type="number" min="1" max="65535" value="<?= esc($data['port'] ?? '') ?>" style="width:160px">
+      <input name="port" type="number" min="1" max="65535"
+             value="<?= old('port', $data['port'] ?? '') ?>" style="width:160px">
     </label><br><br>
 
     <label>Transport<br>
-      <?php $tr = $data['transport'] ?? 'tcp'; ?>
+      <?php $tr = old('transport', $data['transport'] ?? 'tcp'); ?>
       <select name="transport">
         <option value="tcp" <?= $tr==='tcp'?'selected':'' ?>>TCP</option>
         <option value="udp" <?= $tr==='udp'?'selected':'' ?>>UDP</option>
@@ -46,7 +52,7 @@
     </label><br><br>
 
     <label>Mode<br>
-      <?php $md = $data['mode'] ?? 'disabled'; ?>
+      <?php $md = old('mode', $data['mode'] ?? 'disabled'); ?>
       <select name="mode">
         <option value="recording" <?= $md==='recording'?'selected':'' ?>>Recording</option>
         <option value="watch"     <?= $md==='watch'?'selected':'' ?>>Watch only</option>
@@ -55,11 +61,12 @@
     </label><br><br>
 
     <label>FPS (1–60)<br>
-      <input name="fps" type="number" min="1" max="60" value="<?= esc($data['fps'] ?? '') ?>" style="width:120px">
+      <input name="fps" type="number" min="1" max="60"
+             value="<?= old('fps', $data['fps'] ?? '') ?>" style="width:120px">
     </label><br><br>
 
     <label>Audio<br>
-      <?php $aud = (string)($data['audio'] ?? '1'); ?>
+      <?php $aud = (string)old('audio', (string)($data['audio'] ?? '1')); ?>
       <select name="audio">
         <option value="1" <?= $aud==='1'?'selected':'' ?>>On</option>
         <option value="0" <?= $aud==='0'?'selected':'' ?>>Off</option>
@@ -67,15 +74,17 @@
     </label><br><br>
 
     <label>Max Days (0=off)<br>
-      <input name="max_days" type="number" min="0" value="<?= esc($data['max_days'] ?? '') ?>" style="width:160px">
+      <input name="max_days" type="number" min="0"
+             value="<?= old('max_days', $data['max_days'] ?? '') ?>" style="width:160px">
     </label><br><br>
 
     <label>Max Storage (MB, 0=off)<br>
-      <input name="max_storage_mb" type="number" min="0" value="<?= esc($data['max_storage_mb'] ?? '') ?>" style="width:200px">
+      <input name="max_storage_mb" type="number" min="0"
+             value="<?= old('max_storage_mb', $data['max_storage_mb'] ?? '') ?>" style="width:200px">
     </label><br><br>
 
     <label>Notes<br>
-      <textarea name="notes" rows="3" style="width:600px"><?= esc($data['notes'] ?? '') ?></textarea>
+      <textarea name="notes" rows="3" style="width:600px"><?= old('notes', $data['notes'] ?? '') ?></textarea>
     </label><br><br>
 
     <button type="submit"><?= $mode==='create'?'Create':'Update' ?></button>
