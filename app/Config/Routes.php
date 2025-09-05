@@ -19,11 +19,12 @@ $routes->get('logout', 'AuthController::logout');
 $routes->get('dashboard', 'DashboardController::index');
 
 // Cameras (ADMIN)
-$routes->get('cameras', 'CamerasController::index');
-$routes->get('cameras/create', 'CamerasController::create');
-$routes->post('cameras/create', 'CamerasController::create');
-$routes->get('cameras/edit/(:num)', 'CamerasController::edit/$1');
-$routes->post('cameras/edit/(:num)', 'CamerasController::edit/$1');
-$routes->post('cameras/delete/(:num)', 'CamerasController::delete/$1');
+$routes->get ('/cameras',               'CamerasController::index');
+$routes->get ('/cameras/create',        'CamerasController::create');
+$routes->post('/cameras/create',        'CamerasController::create');
+$routes->get ('/cameras/edit/(:num)',   'CamerasController::edit/$1');
+$routes->post('/cameras/edit/(:num)',   'CamerasController::edit/$1');
+$routes->get ('/cameras/delete/(:num)', 'CamerasController::delete/$1');
 
 // ====== END NVR Routes ======
+

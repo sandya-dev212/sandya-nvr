@@ -10,38 +10,18 @@ class CamerasModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
 
-    // WAJIB: daftar field yang boleh di-insert/update
     protected $allowedFields    = [
-        'name',
-        'ip',
-        'username',
-        'password',
-        'path',
-        'port',
-        'transport',
-        'mode',
-        'fps',
-        'audio',
-        'max_days',
-        'max_storage_mb',
-        'notes',
-        // kolom status/info
-        'status_online',
-        'last_seen',
-        'thumbnail_relpath',
-        // timestamps
-        'created_at',
-        'updated_at',
+        'name','ip','username','password','path','port','transport','mode',
+        'fps','audio','max_days','max_storage_mb','notes',
+        'status_online','last_seen','thumbnail_relpath',
+        'created_at','updated_at',
     ];
-
     protected $protectFields    = true;
 
-    // Otomatis isi created_at / updated_at
     protected $useTimestamps    = true;
     protected $createdField     = 'created_at';
     protected $updatedField     = 'updated_at';
 
-    // (opsional) biar error dari DB/validation kebaca jelas
     protected $validationRules = [
         'name'      => 'required|min_length[2]|max_length[120]',
         'ip'        => 'required|valid_ip',
