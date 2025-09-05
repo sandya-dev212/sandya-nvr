@@ -49,4 +49,17 @@ class AuthController extends BaseController
     public function logout()
     {
         session()->destroy();
-        return re
+        return redirect()->to('/login');
+    }
+
+    // debug helper
+    public function whoami()
+    {
+        $s = session();
+        return $this->response->setJSON([
+            'uid'      => $s->get('uid'),
+            'uname'    => $s->get('uname'),
+            'is_admin' => $s->get('is_admin'),
+        ]);
+    }
+}
