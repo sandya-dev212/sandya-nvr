@@ -2,6 +2,7 @@
 <nav>
   <a href="/dashboard">Dashboard</a>
   <?php if($isAdmin): ?>
+    <a href="/cameras">Cameras</a>
     <a href="/settings">Settings</a>
   <?php endif; ?>
   <?php if(session()->get('uid')): ?>

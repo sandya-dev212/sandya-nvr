@@ -2,30 +2,33 @@
 
 namespace Config;
 
-use CodeIgniter\Config\BaseConfig;
-use CodeIgniter\Router\RouteCollection;
 use Config\Services;
-
-/**
- * @var RouteCollection $routes
- */
+/** @var \CodeIgniter\Router\RouteCollection $routes */
 $routes = Services::routes();
 
-// Default setup
 $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('DashboardController');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
 $routes->set404Override();
-$routes->setAutoRoute(false); // biar eksplisit
+$routes->setAutoRoute(false);
 
-// ROOT → dashboard (bukan welcome)
+/* Root */
 $routes->get('/', 'DashboardController::index');
 
-// Auth
+/* Auth */
 $routes->match(['get','post'], 'login', 'AuthController::login');
 $routes->get('logout', 'AuthController::logout');
 $routes->get('whoami', 'AuthController::whoami'); // debug
 
-// Dashboard
+/* Dashboard */
 $routes->get('dashboard', 'DashboardController::index');
+
+/* Settings (read-only dulu) */
+$routes->get('settings', 'SettingsController::index');
+
+/* Cameras (ADMIN) */
+$routes->get('cameras', 'CamerasController::index');          // list
+$routes->match(['get','post'], 'cameras/create', 'CamerasController::create');
+$routes->match(['get','post'], 'cameras/edit/(:num)', 'CamerasController::edit/$1');
+$routes->post('cameras/delete/(:num)', 'CamerasController::delete/$1');
