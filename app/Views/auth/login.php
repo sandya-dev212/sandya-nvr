@@ -3,13 +3,18 @@
 
 <h2>Login</h2>
 
-<?php if(!empty($error)): ?>
+<?php if (!empty($error)): ?>
   <div class="card" style="border-color:#ef4444;color:#b91c1c">
     <?= esc($error) ?>
   </div>
 <?php endif; ?>
 
-<form method="post" action="/login">
+<div class="muted" style="margin-bottom:8px">
+  <!-- Debug ringan biar keliatan POST nyampe / enggak -->
+  Request: <strong><?= isset($method) ? esc($method) : 'UNKNOWN' ?></strong>
+</div>
+
+<form method="post" action="/login" autocomplete="on">
   <?= csrf_field() ?>
   <div class="card">
     <label>Username<br>

@@ -8,17 +8,27 @@ class AuthController extends BaseController
 {
     public function login()
     {
-        // kalau sudah login, langsung lempar ke dashboard
+        // kalau sudah login, langsung ke dashboard
         if (session()->get('uid')) {
             return redirect()->to('/dashboard');
         }
 
-        // tampilan awal
-        $data = ['stats' => sys_stats(), 'error' => null];
+        $method = strtoupper($this->request->getMethod());
+        $data = [
+            'stats'  => sys_stats(),
+            'error'  => null,
+            'method' => $method,   // debug: GET / POST
+        ];
 
-        if ($this->request->getMethod() === 'post') {
+        if ($method === 'POST') {
             $username = trim((string)$this->request->getPost('username'));
             $password = (string)$this->request->getPost('password');
+
+            // simple sanity debug
+            if ($username === '' || $password === '') {
+                $data['error'] = 'Form kosong / tidak terkirim.';
+                return view('auth/login', $data);
+            }
 
             $m = new UsersModel();
             $user = $m->where('username', $username)
@@ -27,19 +37,15 @@ class AuthController extends BaseController
 
             // LOCAL auth (LDAP nanti)
             if ($user && $user['type'] === 'local' && password_verify($password, $user['password_hash'])) {
-                // set session
                 session()->set([
                     'uid'      => (int)$user['id'],
                     'uname'    => $user['username'],
                     'is_admin' => (int)$user['is_admin'],
                 ]);
-                // penting: regenerate supaya cookie sesi baru
                 session()->regenerate(true);
-
                 return redirect()->to('/dashboard');
             }
 
-            // gagal → tampilkan error DI HALAMAN INI (bukan redirect)
             $data['error'] = 'Login gagal. Cek username/password.';
         }
 
@@ -52,7 +58,7 @@ class AuthController extends BaseController
         return redirect()->to('/login');
     }
 
-    // debug helper
+    // debug: cek session
     public function whoami()
     {
         $s = session();
