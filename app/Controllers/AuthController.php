@@ -13,6 +13,9 @@ class AuthController extends BaseController
             return redirect()->to('/dashboard');
         }
 
+        // tampilan awal
+        $data = ['stats' => sys_stats(), 'error' => null];
+
         if ($this->request->getMethod() === 'post') {
             $username = trim((string)$this->request->getPost('username'));
             $password = (string)$this->request->getPost('password');
@@ -30,32 +33,20 @@ class AuthController extends BaseController
                     'uname'    => $user['username'],
                     'is_admin' => (int)$user['is_admin'],
                 ]);
+                // penting: regenerate supaya cookie sesi baru
                 session()->regenerate(true);
 
                 return redirect()->to('/dashboard');
             }
 
-            // TODO: LDAP branch di sini (nanti)
-            return redirect()->back()->with('error', 'Login gagal');
+            // gagal → tampilkan error DI HALAMAN INI (bukan redirect)
+            $data['error'] = 'Login gagal. Cek username/password.';
         }
 
-        return view('auth/login', ['stats' => sys_stats()]);
+        return view('auth/login', $data);
     }
 
     public function logout()
     {
         session()->destroy();
-        return redirect()->to('/login');
-    }
-
-    // debug helper
-    public function whoami()
-    {
-        $s = session();
-        return $this->response->setJSON([
-            'uid'   => $s->get('uid'),
-            'uname' => $s->get('uname'),
-            'is_admin' => $s->get('is_admin'),
-        ]);
-    }
-}
+        return re

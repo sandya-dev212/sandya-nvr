@@ -3,9 +3,9 @@
 
 <h2>Login</h2>
 
-<?php if(session()->getFlashdata('error')): ?>
+<?php if(!empty($error)): ?>
   <div class="card" style="border-color:#ef4444;color:#b91c1c">
-    <?= esc(session()->getFlashdata('error')) ?>
+    <?= esc($error) ?>
   </div>
 <?php endif; ?>
 
