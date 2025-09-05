@@ -18,18 +18,15 @@ class CamerasController extends BaseController
         if ($r = $this->guardAdmin()) return $r;
 
         $m = new CamerasModel();
-
         $pageSize = 10;
         $s = new SettingsModel();
         $row = $s->find('dashboard_pagination');
         if ($row && is_numeric($row['value'])) $pageSize = (int)$row['value'];
 
         $cameras = $m->orderBy('name','asc')->paginate($pageSize);
-        $pager   = $m->pager;
-
         return view('cameras/index', [
             'cameras' => $cameras,
-            'pager'   => $pager,
+            'pager'   => $m->pager,
             'stats'   => sys_stats(),
         ]);
     }
@@ -46,6 +43,7 @@ class CamerasController extends BaseController
                 if ($m->insert($data) !== false) {
                     return redirect()->to('/cameras');
                 }
+                // gagal dari Model → tampilkan error
                 return view('cameras/form', [
                     'mode'   =>'create',
                     'errors' => $m->errors(),
@@ -53,6 +51,7 @@ class CamerasController extends BaseController
                     'stats'  => sys_stats(),
                 ]);
             }
+            // gagal validasi → tampilkan error
             return view('cameras/form', [
                 'mode'   =>'create',
                 'errors' => $data['__errors'],
@@ -106,11 +105,14 @@ class CamerasController extends BaseController
         return redirect()->to('/cameras');
     }
 
+    // ---------- helpers ----------
     private function validateAndCollect(): array
     {
         $rules = [
             'name'           => 'required|min_length[2]|max_length[120]',
             'ip'             => 'required|valid_ip',
+            'username'       => 'permit_empty|max_length[128]',
+            'password'       => 'permit_empty|max_length[128]',
             'path'           => 'permit_empty|max_length[255]',
             'port'           => 'permit_empty|integer|greater_than_equal_to[1]|less_than_equal_to[65535]',
             'transport'      => 'required|in_list[tcp,udp]',
@@ -124,11 +126,17 @@ class CamerasController extends BaseController
         if (!$this->validate($rules)) {
             return ['__ok'=>false,'__errors'=>$this->validator->getErrors()];
         }
+
+        $path = trim((string)$this->request->getPost('path')) ?: '/';
+        if ($path[0] !== '/') $path = '/'.$path;
+
         return [
-            '__ok'=>true,
+            '__ok'           => true,
             'name'           => trim($this->request->getPost('name')),
             'ip'             => trim($this->request->getPost('ip')),
-            'path'           => trim((string)$this->request->getPost('path')) ?: '/',
+            'username'       => $this->emptyToNull(trim((string)$this->request->getPost('username'))),
+            'password'       => $this->emptyToNull(trim((string)$this->request->getPost('password'))),
+            'path'           => $path,
             'port'           => $this->nullIfEmpty($this->request->getPost('port')),
             'transport'      => $this->request->getPost('transport'),
             'mode'           => $this->request->getPost('mode'),

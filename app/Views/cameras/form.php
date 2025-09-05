@@ -16,13 +16,20 @@
 <form method="post" action="<?= $mode==='create'?'/cameras/create':'/cameras/edit/'.(int)($data['id']??0) ?>">
   <?= csrf_field() ?>
   <div class="card">
-
     <label>Nama Kamera<br>
       <input name="name" required value="<?= esc($data['name'] ?? '') ?>" style="width:360px">
     </label><br><br>
 
     <label>Camera IP<br>
-      <input name="ip" required placeholder="192.168.1.10" value="<?= esc($data['ip'] ?? '') ?>" style="width:220px">
+      <input name="ip" required placeholder="10.11.212.11" value="<?= esc($data['ip'] ?? '') ?>" style="width:220px">
+    </label><br><br>
+
+    <label>Username (opsional)<br>
+      <input name="username" value="<?= esc($data['username'] ?? '') ?>" style="width:220px">
+    </label><br><br>
+
+    <label>Password (opsional)<br>
+      <input name="password" value="<?= esc($data['password'] ?? '') ?>" style="width:220px">
     </label><br><br>
 
     <label>Path (contoh: /, /index, /cam/realmonitor?channel=1&subtype=0)<br>

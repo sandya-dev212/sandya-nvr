@@ -146,27 +146,19 @@ class Recorder extends BaseCommand
         foreach ($it as $file) {
             /** @var \SplFileInfo $file */
             if (strtolower($file->getExtension())==='mp4') {
-                $files[] = $file->getPathname();
-            }
+                $files[] = $file->getPathname();private function buildRtsp(array $c): string
+{
+    $auth = '';
+    if (!empty($c['username'])) {
+        $auth = $c['username'];
+        if (!empty($c['password'])) {
+            // URL-encode password biar aman
+            $auth .= ':' . rawurlencode($c['password']);
         }
-        usort($files, fn($a,$b)=>filemtime($a) <=> filemtime($b));
-        return $files;
+        $auth .= '@';
     }
-
-    private function deleteOlderThan(string $dir, int $ts): void
-    {
-        if (!is_dir($dir)) return;
-        $it = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST
-        );
-        foreach ($it as $f) {
-            $path = $f->getPathname();
-            if ($f->isFile() && strtolower($f->getExtension())==='mp4' && filemtime($path) < $ts) {
-                @unlink($path);
-            }
-            // bersihkan folder tanggal kosong
-            if ($f->isDir() && !glob($path.'/*')) { @rmdir($path); }
-        }
-    }
+    $port = $c['port'] ? ':'.(int)$c['port'] : '';
+    $path = $c['path'] ?: '/';
+    if ($path[0] !== '/') $path = '/'.$path;
+    return 'rtsp://' . $auth . $c['ip'] . $port . $path;
 }
