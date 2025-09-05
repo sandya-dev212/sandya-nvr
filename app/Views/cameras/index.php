@@ -3,6 +3,13 @@
 
 <h2>Cameras</h2>
 
+<?php if(!empty($msg)): ?>
+  <div class="card" style="border-color:#10b981;color:#065f46"><?= $msg ?></div>
+<?php endif; ?>
+<?php if(!empty($err)): ?>
+  <div class="card" style="border-color:#ef4444;color:#991b1b"><?= esc($err) ?></div>
+<?php endif; ?>
+
 <div class="card"><a href="/cameras/create">+ Add Camera</a></div>
 
 <?php if (empty($cameras)): ?>
@@ -12,14 +19,8 @@
     <table border="0" cellpadding="8" cellspacing="0" style="width:100%">
       <thead>
         <tr style="text-align:left;border-bottom:1px solid #e5e7eb">
-          <th>Name</th>
-          <th>IP</th>
-          <th>Path</th>
-          <th>Mode</th>
-          <th>FPS</th>
-          <th>Audio</th>
-          <th>Transport</th>
-          <th>Last Seen</th>
+          <th>Name</th><th>IP</th><th>Path</th><th>Mode</th>
+          <th>FPS</th><th>Audio</th><th>Transport</th><th>Last Seen</th>
           <th style="width:180px">Actions</th>
         </tr>
       </thead>

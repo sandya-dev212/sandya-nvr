@@ -3,14 +3,11 @@
 
 <h2><?= $mode==='create'?'Add Camera':'Edit Camera' ?></h2>
 
-<?php if(!empty($errors)): ?>
-  <div class="card" style="border-color:#ef4444;color:#b91c1c">
-    <ul>
-      <?php foreach($errors as $k=>$v): ?>
-        <li><strong><?= esc($k) ?></strong>: <?= esc($v) ?></li>
-      <?php endforeach; ?>
-    </ul>
-  </div>
+<?php if(!empty($msg)): ?>
+  <div class="card" style="border-color:#10b981;color:#065f46"><?= $msg ?></div>
+<?php endif; ?>
+<?php if(!empty($err)): ?>
+  <div class="card" style="border-color:#ef4444;color:#991b1b"><?= esc($err) ?></div>
 <?php endif; ?>
 
 <form method="post" action="<?= $mode==='create'?'/cameras/create':'/cameras/edit/'.(int)($data['id']??0) ?>">
@@ -21,7 +18,7 @@
     </label><br><br>
 
     <label>Camera IP<br>
-      <input name="ip" required placeholder="10.11.212.11" value="<?= esc($data['ip'] ?? '') ?>" style="width:220px">
+      <input name="ip" required placeholder="xx.xx.xx.xx" value="<?= esc($data['ip'] ?? '') ?>" style="width:220px">
     </label><br><br>
 
     <label>Username (opsional)<br>
@@ -32,7 +29,7 @@
       <input name="password" value="<?= esc($data['password'] ?? '') ?>" style="width:220px">
     </label><br><br>
 
-    <label>Path (contoh: /, /index, /cam/realmonitor?channel=1&subtype=0)<br>
+    <label>Path (/, /index, /cam/realmonitor?channel=1&subtype=0)<br>
       <input name="path" placeholder="/" value="<?= esc($data['path'] ?? '/') ?>" style="width:600px">
     </label><br><br>
 

@@ -3,6 +3,7 @@ namespace App\Controllers;
 
 use App\Models\CamerasModel;
 use App\Models\SettingsModel;
+use Config\Database;
 
 class CamerasController extends BaseController
 {
@@ -23,11 +24,15 @@ class CamerasController extends BaseController
         $row = $s->find('dashboard_pagination');
         if ($row && is_numeric($row['value'])) $pageSize = (int)$row['value'];
 
-        $cameras = $m->orderBy('name','asc')->paginate($pageSize);
+        $cams  = $m->orderBy('name','asc')->paginate($pageSize);
+        $pager = $m->pager;
+
         return view('cameras/index', [
-            'cameras' => $cameras,
-            'pager'   => $m->pager,
+            'cameras' => $cams,
+            'pager'   => $pager,
             'stats'   => sys_stats(),
+            'msg'     => session()->getFlashdata('msg'),
+            'err'     => session()->getFlashdata('err'),
         ]);
     }
 
@@ -35,33 +40,43 @@ class CamerasController extends BaseController
     {
         if ($r = $this->guardAdmin()) return $r;
 
-        if ($this->request->getMethod()==='post') {
+        if ($this->request->getMethod() === 'post') {
             $data = $this->validateAndCollect();
             if ($data['__ok']) {
                 unset($data['__ok']);
-                $m = new CamerasModel();
-                if ($m->insert($data) !== false) {
+
+                $db = Database::connect();
+                $m  = new CamerasModel();
+
+                try {
+                    $ok = $m->insert($data);
+                    if ($ok === false) {
+                        // error dari Model/validation
+                        $errors = $m->errors();
+                        session()->setFlashdata('err', 'Save failed: '.json_encode($errors));
+                        return redirect()->back()->withInput();
+                    }
+                    session()->setFlashdata('msg', 'New camera <b>'.esc($data['name']).'</b> added.');
                     return redirect()->to('/cameras');
+                } catch (\Throwable $e) {
+                    $dberr = $db->error();
+                    $msg = $dberr['message'] ?? $e->getMessage();
+                    session()->setFlashdata('err', 'DB error: '.$msg);
+                    return redirect()->back()->withInput();
                 }
-                // gagal dari Model → tampilkan error
-                return view('cameras/form', [
-                    'mode'   =>'create',
-                    'errors' => $m->errors(),
-                    'data'   => $this->request->getPost(),
-                    'stats'  => sys_stats(),
-                ]);
+            } else {
+                session()->setFlashdata('err', 'Validation failed: '.json_encode($data['__errors']));
+                return redirect()->back()->withInput();
             }
-            // gagal validasi → tampilkan error
-            return view('cameras/form', [
-                'mode'   =>'create',
-                'errors' => $data['__errors'],
-                'data'   => $this->request->getPost(),
-                'stats'  => sys_stats(),
-            ]);
         }
 
         return view('cameras/form', [
-            'mode'=>'create','errors'=>[],'data'=>[],'stats'=>sys_stats()
+            'mode'  => 'create',
+            'errors'=> [],
+            'data'  => old() ?: [],
+            'stats' => sys_stats(),
+            'msg'   => session()->getFlashdata('msg'),
+            'err'   => session()->getFlashdata('err'),
         ]);
     }
 
@@ -69,32 +84,43 @@ class CamerasController extends BaseController
     {
         if ($r = $this->guardAdmin()) return $r;
 
-        $m = new CamerasModel();
+        $m   = new CamerasModel();
         $cam = $m->find((int)$id);
-        if (!$cam) return redirect()->to('/cameras');
+        if (!$cam) {
+            session()->setFlashdata('err', 'Camera not found.');
+            return redirect()->to('/cameras');
+        }
 
-        if ($this->request->getMethod()==='post') {
+        if ($this->request->getMethod() === 'post') {
             $data = $this->validateAndCollect();
             if ($data['__ok']) {
                 unset($data['__ok']);
-                if ($m->update((int)$id, $data) !== false) {
+                try {
+                    if ($m->update((int)$id, $data) === false) {
+                        session()->setFlashdata('err', 'Update failed: '.json_encode($m->errors()));
+                        return redirect()->back()->withInput();
+                    }
+                    session()->setFlashdata('msg', 'Camera <b>'.esc($data['name']).'</b> updated.');
                     return redirect()->to('/cameras');
+                } catch (\Throwable $e) {
+                    $dberr = Database::connect()->error();
+                    $msg   = $dberr['message'] ?? $e->getMessage();
+                    session()->setFlashdata('err', 'DB error: '.$msg);
+                    return redirect()->back()->withInput();
                 }
-                return view('cameras/form', [
-                    'mode'=>'edit','errors'=>$m->errors(),
-                    'data'=>array_merge($cam,$this->request->getPost()),
-                    'stats'=>sys_stats(),
-                ]);
+            } else {
+                session()->setFlashdata('err', 'Validation failed: '.json_encode($data['__errors']));
+                return redirect()->back()->withInput();
             }
-            return view('cameras/form', [
-                'mode'=>'edit','errors'=>$data['__errors'],
-                'data'=>array_merge($cam,$this->request->getPost()),
-                'stats'=>sys_stats(),
-            ]);
         }
 
         return view('cameras/form', [
-            'mode'=>'edit','errors'=>[],'data'=>$cam,'stats'=>sys_stats()
+            'mode'  => 'edit',
+            'errors'=> [],
+            'data'  => array_merge($cam, old()?:[]),
+            'stats' => sys_stats(),
+            'msg'   => session()->getFlashdata('msg'),
+            'err'   => session()->getFlashdata('err'),
         ]);
     }
 
@@ -102,10 +128,12 @@ class CamerasController extends BaseController
     {
         if ($r = $this->guardAdmin()) return $r;
         (new CamerasModel())->delete((int)$id);
+        session()->setFlashdata('msg', 'Camera deleted.');
         return redirect()->to('/cameras');
     }
 
-    // ---------- helpers ----------
+    // =========================
+
     private function validateAndCollect(): array
     {
         $rules = [
@@ -147,7 +175,6 @@ class CamerasController extends BaseController
             'notes'          => $this->emptyToNull(trim((string)$this->request->getPost('notes'))),
         ];
     }
-
     private function nullIfEmpty($v){ return ($v===null || $v==='') ? null : (int)$v; }
     private function emptyToNull($v){ return ($v==='') ? null : $v; }
 }
