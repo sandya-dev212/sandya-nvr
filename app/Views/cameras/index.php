@@ -3,9 +3,7 @@
 
 <h2>Cameras</h2>
 
-<div class="card">
-  <a href="/cameras/create">+ Add Camera</a>
-</div>
+<div class="card"><a href="/cameras/create">+ Add Camera</a></div>
 
 <?php if (empty($cameras)): ?>
   <div class="card muted">Belum ada kamera.</div>
@@ -15,6 +13,8 @@
       <thead>
         <tr style="text-align:left;border-bottom:1px solid #e5e7eb">
           <th>Name</th>
+          <th>IP</th>
+          <th>Path</th>
           <th>Mode</th>
           <th>FPS</th>
           <th>Audio</th>
@@ -27,14 +27,15 @@
         <?php foreach($cameras as $c): ?>
           <tr style="border-bottom:1px solid #f1f5f9">
             <td><strong><?= esc($c['name']) ?></strong></td>
+            <td><?= esc($c['ip']) ?><?= $c['port']?':'.(int)$c['port']:'' ?></td>
+            <td><code><?= esc($c['path']) ?></code></td>
             <td><?= esc($c['mode']) ?></td>
             <td><?= esc($c['fps'] ?? '-') ?></td>
-            <td><?= ($c['audio'] ? 'On' : 'Off') ?></td>
+            <td><?= $c['audio']?'On':'Off' ?></td>
             <td><?= esc(strtoupper($c['transport'])) ?></td>
             <td><?= esc($c['last_seen'] ?? '-') ?></td>
             <td>
-              <a href="/cameras/edit/<?= (int)$c['id'] ?>">Edit</a>
-              |
+              <a href="/cameras/edit/<?= (int)$c['id'] ?>">Edit</a> |
               <form method="post" action="/cameras/delete/<?= (int)$c['id'] ?>" style="display:inline" onsubmit="return confirm('Delete camera?')">
                 <?= csrf_field() ?>
                 <button type="submit" style="background:#ef4444;color:#fff;border:0;border-radius:8px;padding:4px 8px">Delete</button>
@@ -45,10 +46,7 @@
       </tbody>
     </table>
   </div>
-
-  <div class="card">
-    <?= $pager->links() ?>
-  </div>
+  <div class="card"><?= $pager->links() ?></div>
 <?php endif; ?>
 
 <?= $this->endSection() ?>
